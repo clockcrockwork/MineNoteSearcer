@@ -25,6 +25,11 @@
     <input type="checkbox" id="searchCW" checked>
     <input type="date" id="dateFrom">
     <input type="date" id="dateTo">
+    <label for="searchType">検索タイプ:</label>
+    <select id="searchType">
+      <option value="or">OR</option>
+      <option value="and">AND</option>
+    </select>
     <button id="searchBtn">検索</button>
   </div>
   <div id="notesContainer"></div>
@@ -88,9 +93,16 @@
         if (searchInText && note.text) searchFields.push(note.text);
         if (searchInCW && note.cw) searchFields.push(note.cw);
 
-        return keywords.some(keyword =>
-          searchFields.some(field => field.includes(keyword))
-        );
+        const searchType = document.getElementById('searchType').value;
+        if (searchType === 'or') {
+          return keywords.some(keyword =>
+            searchFields.some(field => field.includes(keyword))
+          );
+        } else {
+          return keywords.every(keyword =>
+            searchFields.some(field => field.includes(keyword))
+          );
+        }
       });
 
       displayedNotes = 0;
