@@ -4,7 +4,31 @@
   <meta charset="UTF-8">
   <title>Misskeyノート検索</title>
   <style>
-    /* ここにCSSを追加してください */
+    #notesContainer {
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      text-decoration: none;
+      color: black;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+      padding: 0.5em 0;
+    }
+
+    span.date-text {
+      font-size: 0.8em;
+      display: block;
+    }
+
+    p.cw-text {
+      color: rgba(0, 0, 0, 0.6);
+      margin-left: 3ch;
+    }
+
+    p.note-text {
+      color: black;
+    }
+
   </style>
 </head>
 <body>
@@ -119,12 +143,24 @@
         const noteUrl = `https://${instanceInput.value}/${userIdInput.value}/notes/${note.id}`;
         const noteElement = document.createElement('div');
         const noteLink = document.createElement('a');
-        const noteDate = new Date(note.createdAt).toLocaleString();
-        const noteText = note.text ? note.text : '';
-        const noteCW = note.cw ? ` [CW: ${note.cw}]` : '';
+        const noteDateElem = document.createElement('span');
+        noteDateElem.className = 'date-text';
+        noteDateElem.textContent = new Date(note.createdAt).toLocaleString();
+
+        const noteTextElem = document.createElement('p');
+        noteTextElem.className = 'note-text';
+        noteTextElem.textContent = note.text ? note.text : '';
+
+        const noteCWElem = document.createElement('p');
+        noteCWElem.className = 'cw-text';
+        noteCWElem.textContent = note.cw ? `CW: ${note.cw}` : '';
+
 
         noteLink.href = noteUrl;
-        noteLink.textContent = `${noteDate} - ${noteText}${noteCW}`;
+        noteLink.appendChild(noteDateElem);
+        if (note.text) noteLink.appendChild(noteTextElem);
+        if (note.cw) noteLink.appendChild(noteCWElem);
+
         noteElement.appendChild(noteLink);
         notesContainer.appendChild(noteElement);
       });
