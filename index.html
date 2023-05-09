@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Misskeyノート検索</title>
+  <style>
+    /* ここにCSSを追加してください */
+  </style>
+</head>
+<body>
+  <form id="form">
+    <label for="instance">Instance:</label>
+    <input type="text" id="instance" required>
+    <label for="userId">User ID:</label>
+    <input type="text" id="userId" required>
+    <label for="jsonUpload">JSONファイル:</label>
+    <input type="file" id="jsonUpload" accept=".json" required>
+  </form>
+  <button id="loadBtn">JSONを読み込む</button>
+  <div id="searchContainer">
+    <input type="text" id="searchInput" placeholder="検索ワード">
+    <label for="searchText">Text:</label>
+    <input type="checkbox" id="searchText" checked>
+    <label for="searchCW">CW:</label>
+    <input type="checkbox" id="searchCW" checked>
+    <input type="date" id="dateFrom">
+    <input type="date" id="dateTo">
+    <button id="searchBtn">検索</button>
+  </div>
+  <div id="notesContainer"></div>
+  <button id="loadMoreBtn">もっと見る</button>
+
+  <script>
+    const form = document.getElementById('form');
+    const instanceInput = document.getElementById('instance');
+    const userIdInput = document.getElementById('userId');
+    const jsonUpload = document.getElementById('jsonUpload');
+    const loadBtn = document.getElementById('loadBtn');
+    const searchInput = document.getElementById('searchInput');
+    const searchText = document.getElementById('searchText');
+    const searchCW = document.getElementById('searchCW');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+    const searchBtn = document.getElementById('searchBtn');
+    const notesContainer = document.getElementById('notesContainer');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    let notes = [];
+    let filteredNotes = [];
+    let displayedNotes = 0;
+    const notesPerPage = 50;
+
+    loadBtn.addEventListener('click', () => {
+      const file = jsonUpload.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const json = JSON.parse(event.target.result);
+          notes = json.filter(note => note.id && note.createdAt && (note.text || note.cw));
+          filteredNotes = notes;
+          displayNotes();
+        } catch (e) {
+          alert('エラー: JSONファイルが無効です');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    searchBtn.addEventListener('click', () => {
+      const keywords = searchInput.value.trim().split(' ');
+      const searchInText = searchText.checked;
+      const searchInCW = searchCW.checked;
+      const fromDate = dateFrom.value ? new Date(dateFrom.value) : null;
+      const toDate = dateTo.value ? new Date(dateTo.value) : null;
+
+      if (toDate) toDate.setDate(toDate.getDate() + 1);
+
+      filteredNotes = notes.filter(note => {
+        const createdAt = new Date(note.createdAt);
+        if (fromDate && createdAt < fromDate) return false;
+        if (toDate && createdAt >= toDate) return false;
+
+        if (keywords.length === 1 && keywords[0] === '') return true;
+
+        const searchFields = [];
+        if (searchInText && note.text) searchFields.push(note.text);
+        if (searchInCW && note.cw) searchFields.push(note.cw);
+
+        return keywords.some(keyword =>
+          searchFields.some(field => field.includes(keyword))
+        );
+      });
+
+      displayedNotes = 0;
+      displayNotes();
+    });
+
+    loadMoreBtn.addEventListener('click', displayNotes);
+
+    function displayNotes() {
+      const notesToDisplay = filteredNotes.slice(displayedNotes, displayedNotes + notesPerPage);
+      displayedNotes += notesPerPage;
+
+      notesToDisplay.forEach(note => {
+        const noteUrl = `https://${instanceInput.value}/${userIdInput.value}/notes/${note.id}`;
+        const noteElement = document.createElement('div');
+        const noteLink = document.createElement('a');
+        const noteDate = new Date(note.createdAt).toLocaleString();
+        const noteText = note.text ? note.text : '';
+        const noteCW = note.cw ? ` [CW: ${note.cw}]` : '';
+
+        noteLink.href = noteUrl;
+        noteLink.textContent = `${noteDate} - ${noteText}${noteCW}`;
+        noteElement.appendChild(noteLink);
+        notesContainer.appendChild(noteElement);
+      });
+
+      if (displayedNotes >= filteredNotes.length) {
+        loadMoreBtn.style.display = 'none';
+      } else {
+        loadMoreBtn.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
