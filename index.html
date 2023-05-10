@@ -1,13 +1,38 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <title>Misskeyノート検索</title>
   <style>
+    @viewport {
+      width: device-width;
+      zoom: 1.0;
+    }
+
+    input,
+    textarea,
+    select,
+    button {
+      font-size: 18px;
+    }
+
+    #notesContainer,
+    #searchContainer,
+    form {
+      max-width: 98%;
+      margin: 0 auto;
+    }
+
     #notesContainer {
       display: flex;
       flex-direction: column;
     }
+
+    #notesContainer>div:nth-child(even) {
+      background-color: rgba(173, 216, 230, 0.3);
+    }
+
     a {
       text-decoration: none;
       color: black;
@@ -22,15 +47,15 @@
 
     p.cw-text {
       color: rgba(0, 0, 0, 0.6);
-      margin-left: 3ch;
+      margin-right: 3ch;
     }
 
     p.note-text {
       color: black;
     }
-
   </style>
 </head>
+
 <body>
   <form id="form">
     <label for="instance">Instance:</label>
@@ -56,6 +81,7 @@
     </select>
     <button id="searchBtn">検索</button>
   </div>
+  <div id="errorContainer"></div>
   <div id="notesContainer"></div>
   <button id="loadMoreBtn">もっと見る</button>
 
@@ -71,6 +97,7 @@
     const dateFrom = document.getElementById('dateFrom');
     const dateTo = document.getElementById('dateTo');
     const searchBtn = document.getElementById('searchBtn');
+    const errorContainer = document.getElementById('errorContainer');
     const notesContainer = document.getElementById('notesContainer');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
 
@@ -80,6 +107,18 @@
     const notesPerPage = 50;
 
     loadBtn.addEventListener('click', () => {
+
+      const instance = instanceInput.value;
+      const userId = userIdInput.value;
+
+      errorContainer.textContent = '';
+
+      if (!instance || !userId) {
+        errorContainer.textContent = 'InstanceとUserIdの入力が必要です。';
+        event.preventDefault();
+        return;
+      }
+
       const file = jsonUpload.files[0];
       if (!file) return;
 
@@ -98,6 +137,8 @@
     });
 
     searchBtn.addEventListener('click', () => {
+      notesContainer.innerHTML = '';
+
       const keywords = searchInput.value.trim().split(' ');
       const searchInText = searchText.checked;
       const searchInCW = searchCW.checked;
@@ -158,8 +199,8 @@
 
         noteLink.href = noteUrl;
         noteLink.appendChild(noteDateElem);
-        if (note.text) noteLink.appendChild(noteTextElem);
         if (note.cw) noteLink.appendChild(noteCWElem);
+        if (note.text) noteLink.appendChild(noteTextElem);
 
         noteElement.appendChild(noteLink);
         notesContainer.appendChild(noteElement);
@@ -173,4 +214,5 @@
     }
   </script>
 </body>
+
 </html>
