@@ -181,7 +181,7 @@
       displayedNotes += notesPerPage;
 
       notesToDisplay.forEach(note => {
-        const noteUrl = `https://${instanceInput.value}/${userIdInput.value}/notes/${note.id}`;
+        const noteUrl = `https://${instanceInput.value}/notes/${note.id}`;
         const noteElement = document.createElement('div');
         const noteLink = document.createElement('a');
         const noteDateElem = document.createElement('span');
