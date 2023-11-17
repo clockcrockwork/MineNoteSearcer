@@ -88,7 +88,6 @@
   <script>
     const form = document.getElementById('form');
     const instanceInput = document.getElementById('instance');
-    const userIdInput = document.getElementById('userId');
     const jsonUpload = document.getElementById('jsonUpload');
     const loadBtn = document.getElementById('loadBtn');
     const searchInput = document.getElementById('searchInput');
@@ -109,12 +108,11 @@
     loadBtn.addEventListener('click', () => {
 
       const instance = instanceInput.value;
-      const userId = userIdInput.value;
 
       errorContainer.textContent = '';
 
-      if (!instance || !userId) {
-        errorContainer.textContent = 'InstanceとUserIdの入力が必要です。';
+      if (!instance) {
+        errorContainer.textContent = 'Instanceの入力が必要です。';
         event.preventDefault();
         return;
       }
